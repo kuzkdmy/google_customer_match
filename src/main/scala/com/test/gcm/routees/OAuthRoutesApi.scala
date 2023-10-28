@@ -8,16 +8,22 @@ import sttp.tapir.json.circe._
 object OAuthRoutesApi {
   private val baseEndpoint = endpoint.in("api").in("oauth")
 
-  val initOAuthAttemptE: PublicEndpoint[Unit, Unit, InitOAuthAttemptResponse, Any] =
-    baseEndpoint.post.out(jsonBody[InitOAuthAttemptResponse])
+  val initOAuthE: PublicEndpoint[Unit, Unit, InitOAuthResponse, Any] =
+    baseEndpoint.post.out(jsonBody[InitOAuthResponse])
 
-  val completeOAuthAttemptE
-      : PublicEndpoint[CompleteOAuthAttemptRequest, Unit, CompleteOAuthAttemptResponse, Any] =
+  val completeOAuthE: PublicEndpoint[CompleteOAuthRequest, Unit, CompleteOAuthResponse, Any] =
     baseEndpoint.put
-      .in(jsonBody[CompleteOAuthAttemptRequest])
-      .out(jsonBody[CompleteOAuthAttemptResponse])
+      .in(jsonBody[CompleteOAuthRequest])
+      .out(jsonBody[CompleteOAuthResponse])
 
-  case class InitOAuthAttemptResponse(id: String, redirectUrl: String)
-  case class CompleteOAuthAttemptRequest(id: String, code: String)
-  case class CompleteOAuthAttemptResponse(id: String, status: String)
+  case class InitOAuthResponse(id: String, redirectUrl: String)
+  case class CompleteOAuthRequest(id: String, code: String)
+
+  // todo as there is no storage, we return access and refresh token
+  case class CompleteOAuthResponse(
+      id: String,
+      tokenExpiresInSeconds: Long,
+      asNoStorageOnServerSideAccessToken: String,
+      asNoStorageOnServerSideRefreshToken: String)
+
 }

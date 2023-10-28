@@ -28,7 +28,7 @@ object Main extends zio.ZIOAppDefault {
             .as(Response(status = Status.InternalServerError))
         }
         .asInstanceOf[zio.http.App[Env]]
-    ZIO.logInfo("Starting server") *>
+    ZIO.logInfo("Starting server with default port : 8080") *>
       Server
         .serve(routes)
         .provide(

@@ -11,36 +11,37 @@ object OAuthRoutesImpl {
   type Env = OAuthRoutesService
 
   def endpoints[R <: Env]: List[ZServerEndpoint[R, ZioStreams]] = List(
-    initOAuthAttemptE.serverLogic(_ =>
+    initOAuthE.serverLogic(_ =>
       ZIO.serviceWithZIO[Env](_.initOAuthAttempt())): ZServerEndpoint[R, ZioStreams],
-    completeOAuthAttemptE.serverLogic(i =>
+    completeOAuthE.serverLogic(i =>
       ZIO.serviceWithZIO[Env](_.completeOAuthAttempt(i))): ZServerEndpoint[R, ZioStreams])
 
 }
 
 trait OAuthRoutesService {
-  def initOAuthAttempt(): Task[Either[Unit, InitOAuthAttemptResponse]]
-
-  def completeOAuthAttempt(
-      req: CompleteOAuthAttemptRequest): Task[Either[Unit, CompleteOAuthAttemptResponse]]
-
+  def initOAuthAttempt(): Task[Either[Unit, InitOAuthResponse]]
+  def completeOAuthAttempt(req: CompleteOAuthRequest): Task[Either[Unit, CompleteOAuthResponse]]
 }
 
 case class OAuthRoutesServiceImpl(svc: OAuthService) extends OAuthRoutesService {
 
-  override def initOAuthAttempt(): Task[Either[Unit, InitOAuthAttemptResponse]] = {
+  override def initOAuthAttempt(): Task[Either[Unit, InitOAuthResponse]] = {
     for {
       e <- svc.oauthAttempt()
-      res = InitOAuthAttemptResponse(id = e.id, redirectUrl = e.redirectUrl)
+      res = InitOAuthResponse(id = e.id, redirectUrl = e.redirectUrl)
     } yield res.asRight
 
   }
 
   override def completeOAuthAttempt(
-      req: CompleteOAuthAttemptRequest): Task[Either[Unit, CompleteOAuthAttemptResponse]] = {
+      req: CompleteOAuthRequest): Task[Either[Unit, CompleteOAuthResponse]] = {
     for {
-      e <- svc.completeOauthAttempt(req.code)
-      res = CompleteOAuthAttemptResponse(id = req.id, status = "success")
+      e <- svc.completeOauthAttempt(req.id, req.code)
+      res = CompleteOAuthResponse(
+        id = req.id,
+        tokenExpiresInSeconds = e.getExpiresInSeconds,
+        asNoStorageOnServerSideAccessToken = e.getAccessToken,
+        asNoStorageOnServerSideRefreshToken = e.getRefreshToken)
     } yield res.asRight
   }
 
