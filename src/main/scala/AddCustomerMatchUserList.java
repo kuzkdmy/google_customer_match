@@ -66,7 +66,7 @@ import java.util.Set;
  */
 public class AddCustomerMatchUserList {
 
-    private static class AddCustomerMatchUserListParams{
+    private static class AddCustomerMatchUserListParams {
 
         private Long customerId;
 
@@ -82,28 +82,28 @@ public class AddCustomerMatchUserList {
             params.runJob = true;
 
         GoogleAdsClient googleAdsClient = null;
-            String secretDeveloperToken = "";
-            // client_id/client_secret from google cloud -> api & services -> credentials -> oauth 2.0
-            String secretClientId       = "";
-            String secretClientSecret   = "";
-            // I got it manually via another app https://github.com/googleads/googleads-python-lib
-            String secretRefreshToken   = "";
-            //  id from test manager client(right top side)
+        String secretDeveloperToken = "";
+        // client_id/client_secret from google cloud -> api & services -> credentials -> oauth 2.0
+        String secretClientId = "";
+        String secretClientSecret = "";
+        // I got it manually via another app https://github.com/googleads/googleads-python-lib
+        String secretRefreshToken = "";
+        //  id from test manager client(right top side)
 
             googleAdsClient =
-                    GoogleAdsClient
-                            .newBuilder()
+                GoogleAdsClient
+                        .newBuilder()
 //    .setCredentials()
-                            .setDeveloperToken(secretDeveloperToken)
-                            .setCredentials(
-                                    UserCredentials
-                                            .newBuilder()
-                                            .setClientId(secretClientId)
-                                            .setClientSecret(secretClientSecret)
-                                            .setRefreshToken(secretRefreshToken)
+                        .setDeveloperToken(secretDeveloperToken)
+                        .setCredentials(
+                                UserCredentials
+                                        .newBuilder()
+                                        .setClientId(secretClientId)
+                                        .setClientSecret(secretClientSecret)
+                                        .setRefreshToken(secretRefreshToken)
 //        .setAccessToken(new AccessToken(secretDeveloperToken, new Date()))
-                                            .build())
-                            .build();
+                                        .build())
+                        .build();
 
         try {
             new AddCustomerMatchUserList()
@@ -132,14 +132,14 @@ public class AddCustomerMatchUserList {
     /**
      * Runs the example.
      *
-     * @param googleAdsClient the Google Ads API client.
-     * @param customerId the client customer ID.
-     * @param runJob if true, runs the OfflineUserDataJob after adding operations. Otherwise, only
-     *     adds operations to the job.
-     * @param userListId optional ID of an existing user list. If {@code null}, creates a new user
-     *     list.
+     * @param googleAdsClient      the Google Ads API client.
+     * @param customerId           the client customer ID.
+     * @param runJob               if true, runs the OfflineUserDataJob after adding operations. Otherwise, only
+     *                             adds operations to the job.
+     * @param userListId           optional ID of an existing user list. If {@code null}, creates a new user
+     *                             list.
      * @param offlineUserDataJobId optional ID of an existing OfflineUserDataJob in the PENDING state.
-     *     If {@code null}, creates a new job.
+     *                             If {@code null}, creates a new job.
      * @throws GoogleAdsException if an API request failed with one or more service errors.
      */
     private void runExample(
@@ -169,7 +169,7 @@ public class AddCustomerMatchUserList {
      * Creates a Customer Match user list.
      *
      * @param googleAdsClient the Google Ads API client.
-     * @param customerId the client customer ID.
+     * @param customerId      the client customer ID.
      * @return the resource name of the newly created user list.
      */
     private String createCustomerMatchUserList(GoogleAdsClient googleAdsClient, long customerId) {
@@ -210,14 +210,14 @@ public class AddCustomerMatchUserList {
     /**
      * Creates and executes an asynchronous job to add users to the Customer Match user list.
      *
-     * @param googleAdsClient the Google Ads API client.
-     * @param customerId the client customer ID.
-     * @param runJob if true, runs the OfflineUserDataJob after adding operations. Otherwise, only
-     *     adds operations to the job.
+     * @param googleAdsClient      the Google Ads API client.
+     * @param customerId           the client customer ID.
+     * @param runJob               if true, runs the OfflineUserDataJob after adding operations. Otherwise, only
+     *                             adds operations to the job.
      * @param userListResourceName the resource name of the Customer Match user list to add members
-     *     to.
+     *                             to.
      * @param offlineUserDataJobId optional ID of an existing OfflineUserDataJob in the PENDING state.
-     *     If {@code null}, creates a new job.
+     *                             If {@code null}, creates a new job.
      */
     private void addUsersToCustomerMatchUserList(
             GoogleAdsClient googleAdsClient,
@@ -413,11 +413,11 @@ public class AddCustomerMatchUserList {
      * Private customer data must be hashed during upload, as described at
      * https://support.google.com/google-ads/answer/7474263.
      *
-     * @param digest the digest to use to hash the normalized string.
-     * @param s the string to normalize and hash.
+     * @param digest                 the digest to use to hash the normalized string.
+     * @param s                      the string to normalize and hash.
      * @param trimIntermediateSpaces if true, removes leading, trailing, and intermediate spaces from
-     *     the string before hashing. If false, only removes leading and trailing spaces from the
-     *     string before hashing.
+     *                               the string before hashing. If false, only removes leading and trailing spaces from the
+     *                               string before hashing.
      */
     private String normalizeAndHash(MessageDigest digest, String s, boolean trimIntermediateSpaces)
             throws UnsupportedEncodingException {
@@ -443,10 +443,10 @@ public class AddCustomerMatchUserList {
     /**
      * Retrieves, checks, and prints the status of the offline user data job.
      *
-     * @param googleAdsClient the Google Ads API client.
-     * @param customerId the client customer ID.
+     * @param googleAdsClient                the Google Ads API client.
+     * @param customerId                     the client customer ID.
      * @param offlineUserDataJobResourceName the resource name of the OfflineUserDataJob to get the
-     *     status for.
+     *                                       status for.
      */
     private void checkJobStatus(
             GoogleAdsClient googleAdsClient, long customerId, String offlineUserDataJobResourceName) {
@@ -497,8 +497,8 @@ public class AddCustomerMatchUserList {
     /**
      * Prints information about the Customer Match user list.
      *
-     * @param googleAdsClient the Google Ads API client.
-     * @param customerId the client customer ID .
+     * @param googleAdsClient      the Google Ads API client.
+     * @param customerId           the client customer ID .
      * @param userListResourceName the resource name of the Customer Match user list.
      */
     private void printCustomerMatchUserListInfo(
