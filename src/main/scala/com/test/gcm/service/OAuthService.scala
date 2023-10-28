@@ -1,6 +1,9 @@
 package com.test.gcm.service
 
-import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleTokenResponse}
+import com.google.api.client.googleapis.auth.oauth2.{
+  GoogleAuthorizationCodeFlow,
+  GoogleTokenResponse
+}
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.store.MemoryDataStoreFactory
@@ -15,7 +18,7 @@ import java.util.Collections
  */
 trait OAuthService {
   def oauthAttempt(): Task[OAuthAttempt]
-  def completeOauthAttempt(code: String): Task[GoogleTokenResponse]
+  def completeOauthAttempt(id: String, code: String): Task[GoogleTokenResponse]
 }
 
 case class OAuthServiceImpl(conf: GoogleServerApiCredsConfig) extends OAuthService {
@@ -23,43 +26,24 @@ case class OAuthServiceImpl(conf: GoogleServerApiCredsConfig) extends OAuthServi
 
   override def oauthAttempt(): Task[OAuthAttempt] = {
     for {
-      _ <- ZIO.logInfo("init oauth attempt")
+      id <- zio.Random.nextUUID.map(_.toString)
+      _ <- ZIO.logInfo(s"init oauth attempt, id:$id")
       auth <- authCodeFlow()
       redirectUrl <- ZIO.attempt(auth.newAuthorizationUrl().setRedirectUri(redirectUri).build())
-      _ <- ZIO.logInfo(s"init oauth attempt success, ${redirectUrl}")
-    } yield OAuthAttempt("123", redirectUrl, "pending")
+      _ <- ZIO.logInfo(s"init oauth attempt, id:$id success, redirect url: $redirectUrl")
+    } yield OAuthAttempt(id, redirectUrl)
   }
 
-
-//
-  //    // Print the authorization URL and have the user visit it to authorize your application
-  //    println("Authorization URL: " + authorizationUrl)
-  //
-  //    // After the user authorizes your application, they will be redirected to your specified redirect URI
-  //    // Parse the authorization code from the query parameter in the redirect URI
-  //    val authorizationCode = "AUTHORIZATION_CODE_FROM_REDIRECT_URI"
-  //
-  //    // Exchange the authorization code for access and refresh tokens
-  //    val tokenResponse = authorizationCodeFlow
-  //      .newTokenRequest(authorizationCode)
-  //      .setRedirectUri(redirectUri)
-  //      .execute()
-  //
-  //    // Access token
-  //    val accessToken = tokenResponse.getAccessToken
-  //
-  //    // Refresh token
-  //    val refreshToken = tokenResponse.getRefreshToken
-  //
-  //    println("Access Token: " + accessToken)
-  //    println("Refresh Token: " + refreshToken)
-
-  override def completeOauthAttempt(code: String): Task[GoogleTokenResponse] = {
+  override def completeOauthAttempt(id: String, code: String): Task[GoogleTokenResponse] = {
     for {
       _ <- ZIO.logInfo("complete oauth attempt")
       auth <- authCodeFlow()
       tokenResp <- ZIO.attempt(auth.newTokenRequest(code).setRedirectUri(redirectUri).execute())
-      _ <- ZIO.logInfo(s"complete oauth attempt success, token expire in seconds: ${tokenResp.getExpiresInSeconds}")
+      _ <- ZIO.logInfo(s"""complete oauth success,
+           |token expire in seconds: ${tokenResp.getExpiresInSeconds},
+           |access token: `${tokenResp.getAccessToken}`,
+           |refresh token: `${tokenResp.getRefreshToken}`
+           |""".replaceAll("\n", " ").stripMargin)
     } yield tokenResp
 
   }
