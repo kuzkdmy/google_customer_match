@@ -13,7 +13,7 @@ object AppConfig {
   lazy val layer: TaskLayer[GoogleServerApiCredsConfig] =
     ConfigSource.default.at("app").load[AppConfig] match {
       case Left(err) => ZLayer.fail(new RuntimeException(err.prettyPrint()) with NoStackTrace)
-      case Right(c) => ZLayer.succeed(c.googleCreds)
+      case Right(c)  => ZLayer.succeed(c.googleCreds)
     }
 
   case class GoogleServerApiCredsConfig(clientId: String, clientSecret: String)

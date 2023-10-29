@@ -11,10 +11,9 @@ object OAuthRoutesImpl {
   type Env = OAuthRoutesService
 
   def endpoints[R <: Env]: List[ZServerEndpoint[R, ZioStreams]] = List(
-    initOAuthE.serverLogic(_ =>
-      ZIO.serviceWithZIO[Env](_.initOAuthAttempt())): ZServerEndpoint[R, ZioStreams],
-    completeOAuthE.serverLogic(i =>
-      ZIO.serviceWithZIO[Env](_.completeOAuthAttempt(i))): ZServerEndpoint[R, ZioStreams])
+    initOAuthE.serverLogic(_ => ZIO.serviceWithZIO[Env](_.initOAuthAttempt())): ZServerEndpoint[R, ZioStreams],
+    completeOAuthE.serverLogic(i => ZIO.serviceWithZIO[Env](_.completeOAuthAttempt(i))): ZServerEndpoint[R, ZioStreams]
+  )
 
 }
 
@@ -33,15 +32,15 @@ case class OAuthRoutesServiceImpl(svc: OAuthService) extends OAuthRoutesService 
 
   }
 
-  override def completeOAuthAttempt(
-      req: CompleteOAuthRequest): Task[Either[Unit, CompleteOAuthResponse]] = {
+  override def completeOAuthAttempt(req: CompleteOAuthRequest): Task[Either[Unit, CompleteOAuthResponse]] = {
     for {
       e <- svc.completeOauthAttempt(req.id, req.code)
       res = CompleteOAuthResponse(
-        id = req.id,
-        tokenExpiresInSeconds = e.getExpiresInSeconds,
-        asNoStorageOnServerSideAccessToken = e.getAccessToken,
-        asNoStorageOnServerSideRefreshToken = e.getRefreshToken)
+              id                                  = req.id,
+              tokenExpiresInSeconds               = e.getExpiresInSeconds,
+              asNoStorageOnServerSideAccessToken  = e.getAccessToken,
+              asNoStorageOnServerSideRefreshToken = e.getRefreshToken
+            )
     } yield res.asRight
   }
 

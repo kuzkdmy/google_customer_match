@@ -20,10 +20,6 @@ object OAuthRoutesApi {
   case class CompleteOAuthRequest(id: String, code: String)
 
   // todo as there is no storage, we return access and refresh token
-  case class CompleteOAuthResponse(
-      id: String,
-      tokenExpiresInSeconds: Long,
-      asNoStorageOnServerSideAccessToken: String,
-      asNoStorageOnServerSideRefreshToken: String)
+  case class CompleteOAuthResponse(id: String, tokenExpiresInSeconds: Long, asNoStorageOnServerSideAccessToken: String, asNoStorageOnServerSideRefreshToken: String)
 
 }
