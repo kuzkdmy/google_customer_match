@@ -13,3 +13,5 @@
 - Make complete oauth attempt request with passing oauth attempt id and authorization code
 2 Create audience
 
+https://developers.google.com/google-ads/api/docs/remarketing/audience-types/customer-match#customer_match_considerations
+https://developers.google.com/google-ads/api/docs/best-practices/quotas#user_data
