@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "2.13.10"
+ThisBuild / scalaVersion := "2.13.12"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "com.test.dev"
 ThisBuild / organizationName := "example"
@@ -16,4 +16,7 @@ lazy val root = (project in file("."))
       "ch.qos.logback" % "logback-classic" % "1.4.7",
       "com.github.pureconfig" %% "pureconfig" % "0.17.4",
       "dev.zio" %% "zio-logging-slf4j" % "2.1.14",
-      "dev.zio" %% "zio-logging-slf4j-bridge" % "2.1.14"))
+      "dev.zio" %% "zio-logging-slf4j-bridge" % "2.1.14",
+      "io.estatico" %% "newtype" % "0.4.4"))
+
+ThisBuild / scalacOptions := Seq("-Ymacro-annotations")

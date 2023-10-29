@@ -2,7 +2,7 @@ package com.test.gcm
 
 import com.test.gcm.config.AppConfig
 import com.test.gcm.routees.{OAuthRoutesImpl, OAuthRoutesServiceImpl}
-import com.test.gcm.service.OAuthServiceImpl
+import com.test.gcm.service.{GCMClientsImpl, GCMJobServiceImpl, GCMUserListServiceImpl, OAuthServiceImpl}
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import zio.http.{Response, Server, Status}
 import zio.logging.consoleLogger
@@ -35,7 +35,11 @@ object Main extends zio.ZIOAppDefault {
           AppConfig.layer,
           OAuthServiceImpl.layer,
           OAuthRoutesServiceImpl.layer,
-          Server.default)
+          Server.default,
+          GCMClientsImpl.layer,
+          GCMJobServiceImpl.layer,
+          GCMUserListServiceImpl.layer
+        )
   }
 
 }
