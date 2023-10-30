@@ -5,37 +5,37 @@ import com.google.ads.googleads.v13.enums.CustomerMatchUploadKeyTypeEnum.Custome
 import com.google.ads.googleads.v13.resources.UserList
 import com.google.ads.googleads.v13.services._
 import com.google.common.collect.ImmutableList
-import com.test.gcm.domain.{CustomerId, UserListResourceName}
+import com.test.gcm.domain.{CustomerOAuth, UserListResourceName}
 import zio.{Task, URLayer, ZIO, ZLayer}
 
 import scala.jdk.CollectionConverters.IterableHasAsScala
 
 trait GCMUserListService {
-  def getUserListByName(customerId: CustomerId, userListName: UserListResourceName): Task[Option[UserList]]
-  def getOrCreateUserList(customerId: CustomerId, userListName: UserListResourceName): Task[UserList]
+  def getUserListByName(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[Option[UserList]]
+  def getOrCreateUserList(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[UserList]
 }
 
 case class GCMUserListServiceImpl(clients: GCMClients) extends GCMUserListService {
 
-  override def getUserListByName(customerId: CustomerId, userListName: UserListResourceName): Task[Option[UserList]] = {
+  override def getUserListByName(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[Option[UserList]] = {
     ZIO.scoped(for {
-      adsServiceClient <- clients.googleAdsServiceClient()
-      query   = s"SELECT id, name, description, membership_status FROM user_list WHERE name = '$userListName'"
-      request = SearchGoogleAdsRequest.newBuilder().setCustomerId(customerId.toString).setQuery(query).build()
+      adsServiceClient <- clients.googleAdsServiceClient(customerOAuth)
+      query   = s"SELECT user_list.id, user_list.name, user_list.description, user_list.membership_status FROM user_list WHERE user_list.name = '$userListName'"
+      request = SearchGoogleAdsRequest.newBuilder().setCustomerId(customerOAuth.customerId.toString).setQuery(query).build()
       response <- ZIO.attempt(adsServiceClient.search(request))
       res      <- ZIO.attempt(response.iterateAll.asScala.toList.headOption.flatMap(r => Option(r.getUserList)))
     } yield res)
   }
 
-  override def getOrCreateUserList(customerId: CustomerId, userListName: UserListResourceName): Task[UserList] = {
+  override def getOrCreateUserList(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[UserList] = {
     ZIO.scoped {
       for {
-        listOpt <- getUserListByName(customerId, userListName)
+        listOpt <- getUserListByName(customerOAuth, userListName)
         res <- listOpt match {
                  case Some(list) => ZIO.succeed(list)
                  case None =>
-                   createUserList(customerId, userListName) *>
-                     getUserListByName(customerId, userListName)
+                   createUserList(customerOAuth, userListName) *>
+                     getUserListByName(customerOAuth, userListName)
                        .flatMap {
                          case Some(list) => ZIO.succeed(list)
                          case None       => ZIO.fail(new RuntimeException(s"User list with name $userListName not found after creation"))
@@ -45,9 +45,9 @@ case class GCMUserListServiceImpl(clients: GCMClients) extends GCMUserListServic
     }
   }
 
-  private def createUserList(customerId: CustomerId, userListName: UserListResourceName): Task[MutateUserListsResponse] = {
+  private def createUserList(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[MutateUserListsResponse] = {
     ZIO.scoped(for {
-      userListClient <- clients.userListServiceClient()
+      userListClient <- clients.userListServiceClient(customerOAuth)
       userList = UserList
                    .newBuilder()
                    .setName(userListName.value)
@@ -62,7 +62,7 @@ case class GCMUserListServiceImpl(clients: GCMClients) extends GCMUserListServic
                    )
                    .build()
       userListOp = UserListOperation.newBuilder().setCreate(userList).build()
-      res <- ZIO.attempt(userListClient.mutateUserLists(customerId.toString, ImmutableList.of(userListOp)))
+      res <- ZIO.attempt(userListClient.mutateUserLists(customerOAuth.customerId.toString, ImmutableList.of(userListOp)))
     } yield res)
   }
 }
