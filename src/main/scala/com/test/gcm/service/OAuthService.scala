@@ -44,7 +44,7 @@ case class OAuthServiceImpl(conf: GoogleServerApiCredsConfig) extends OAuthServi
 
   }
 
-  private def authCodeFlow() = ZIO.attempt(
+  private def authCodeFlow(): Task[GoogleAuthorizationCodeFlow] = ZIO.attempt(
     new GoogleAuthorizationCodeFlow.Builder(
       new NetHttpTransport(),
       GsonFactory.getDefaultInstance,

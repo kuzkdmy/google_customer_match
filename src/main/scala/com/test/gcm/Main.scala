@@ -1,7 +1,7 @@
 package com.test.gcm
 
 import com.test.gcm.config.AppConfig
-import com.test.gcm.routees.{OAuthRoutesImpl, OAuthRoutesServiceImpl}
+import com.test.gcm.routees.{OAuthRoutesImpl, OAuthRoutesServiceImpl, UserListRoutesImpl, UserListRoutesServiceImpl}
 import com.test.gcm.service.{GCMClientsImpl, GCMJobServiceImpl, GCMUserListServiceImpl, OAuthServiceImpl}
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import zio.http.{Response, Server, Status}
@@ -14,10 +14,10 @@ object Main extends zio.ZIOAppDefault {
     zio.Runtime.removeDefaultLoggers >>> consoleLogger()
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
-    type Env = OAuthRoutesImpl.Env
+    type Env = OAuthRoutesImpl.Env with UserListRoutesImpl.Env
     val routes: zio.http.App[Env] =
       ZioHttpInterpreter()
-        .toHttp(OAuthRoutesImpl.endpoints[Env])
+        .toHttp(OAuthRoutesImpl.endpoints[Env] ++ UserListRoutesImpl.endpoints[Env])
         .mapErrorZIO { e =>
           // todo, need to check, this not works now
           println("!!!!!!!")
@@ -38,7 +38,8 @@ object Main extends zio.ZIOAppDefault {
           Server.default,
           GCMClientsImpl.layer,
           GCMJobServiceImpl.layer,
-          GCMUserListServiceImpl.layer
+          GCMUserListServiceImpl.layer,
+          UserListRoutesServiceImpl.layer
         )
   }
 
