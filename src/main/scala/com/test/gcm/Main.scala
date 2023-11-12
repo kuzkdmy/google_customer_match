@@ -1,7 +1,7 @@
 package com.test.gcm
 
 import com.test.gcm.config.AppConfig
-import com.test.gcm.repository.GCMTokenStoreImpl
+import com.test.gcm.repository.GCMConnectionsStoreImpl
 import com.test.gcm.routees.{OAuthRoutesImpl, OAuthRoutesServiceImpl, UserListRoutesImpl, UserListRoutesServiceImpl}
 import com.test.gcm.service.{GCMClientsImpl, GCMJobServiceImpl, GCMUserListServiceImpl, OAuthServiceImpl}
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
@@ -41,7 +41,7 @@ object Main extends zio.ZIOAppDefault {
           GCMJobServiceImpl.layer,
           GCMUserListServiceImpl.layer,
           UserListRoutesServiceImpl.layer,
-          GCMTokenStoreImpl.layer
+          GCMConnectionsStoreImpl.layer
         )
   }
 

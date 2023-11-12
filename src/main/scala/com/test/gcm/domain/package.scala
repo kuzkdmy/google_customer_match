@@ -18,4 +18,5 @@ package object domain {
   @derive(schema) @newtype case class UserListMatchRatePercentage(value: Int)
   @derive(schema) @newtype case class OAuthAccessToken(value: String)
   @derive(schema) @newtype case class OAuthRefreshToken(value: String)
+  @derive(schema) @newtype case class OfflineUserJobResourceName(value: String)
 }
