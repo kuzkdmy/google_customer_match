@@ -5,55 +5,55 @@ import com.google.ads.googleads.v13.enums.OfflineUserDataJobTypeEnum.OfflineUser
 import com.google.ads.googleads.v13.resources.OfflineUserDataJob
 import com.google.ads.googleads.v13.services._
 import com.google.ads.googleads.v13.utils.{ErrorUtils, ResourceNames}
-import com.test.gcm.domain.{CustomerOAuth, OfflineUserDataJobId, UserListResourceName}
+import com.test.gcm.domain.{OAuthConnection, OfflineUserDataJobId, UserListResourceName}
 import zio.{Task, URLayer, ZIO, ZLayer}
 
 import scala.jdk.CollectionConverters.{IterableHasAsJava, IterableHasAsScala}
 
 trait GCMJobService {
-  def getOfflineUserDataJob(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[Option[OfflineUserDataJob]]
-  def createJob(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[CreateOfflineUserDataJobResponse]
-  def addJobOps(customerOAuth: CustomerOAuth, jobId: OfflineUserDataJobId, ops: List[OfflineUserDataJobOperation]): Task[AddOfflineUserDataJobOperationsResponse]
-  def runJob(customerOAuth: CustomerOAuth, jobId: OfflineUserDataJobId): Task[Unit]
+  def getOfflineUserDataJob(connection: OAuthConnection, userListName: UserListResourceName): Task[Option[OfflineUserDataJob]]
+  def createJob(connection: OAuthConnection, userListName: UserListResourceName): Task[CreateOfflineUserDataJobResponse]
+  def addJobOps(connection: OAuthConnection, jobId: OfflineUserDataJobId, ops: List[OfflineUserDataJobOperation]): Task[AddOfflineUserDataJobOperationsResponse]
+  def runJob(connection: OAuthConnection, jobId: OfflineUserDataJobId): Task[Unit]
 }
 
 case class GCMJobServiceImpl(clients: GCMClients) extends GCMJobService {
 
-  override def getOfflineUserDataJob(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[Option[OfflineUserDataJob]] = {
+  override def getOfflineUserDataJob(connection: OAuthConnection, userListName: UserListResourceName): Task[Option[OfflineUserDataJob]] = {
     ZIO.scoped(for {
-      googleAdsServiceClient <- clients.googleAdsServiceClient(customerOAuth)
+      googleAdsServiceClient <- clients.googleAdsServiceClient(connection)
       query =
         s"""SELECT resource_name, id, status, type, failure_reason,
            | customer_match_user_list_metadata.user_list
            | FROM offline_user_data_job
            | WHERE resource_name = '$userListName'
            |""".stripMargin.replaceAll("\n", "")
-      response <- ZIO.attempt(googleAdsServiceClient.search(customerOAuth.customerId.toString, query))
+      response <- ZIO.attempt(googleAdsServiceClient.search(connection.customerId.toString, query))
       res      <- ZIO.attempt(response.iterateAll.asScala.toList.headOption.flatMap(r => Option(r.getOfflineUserDataJob)))
     } yield res)
   }
 
-  override def createJob(customerOAuth: CustomerOAuth, userListName: UserListResourceName): Task[CreateOfflineUserDataJobResponse] = {
+  override def createJob(connection: OAuthConnection, userListName: UserListResourceName): Task[CreateOfflineUserDataJobResponse] = {
     ZIO.scoped {
       for {
-        userJobClient <- clients.offlineUserDataJobServiceClient(customerOAuth)
+        userJobClient <- clients.offlineUserDataJobServiceClient(connection)
         res <- {
           val meta = CustomerMatchUserListMetadata.newBuilder.setUserList(userListName.value)
           val job = OfflineUserDataJob.newBuilder
             .setType(OfflineUserDataJobType.CUSTOMER_MATCH_USER_LIST)
             .setCustomerMatchUserListMetadata(meta)
             .build
-          ZIO.attempt(userJobClient.createOfflineUserDataJob(customerOAuth.customerId.toString, job))
+          ZIO.attempt(userJobClient.createOfflineUserDataJob(connection.customerId.toString, job))
         }
       } yield res
     }
   }
 
-  override def addJobOps(customerOAuth: CustomerOAuth, jobId: OfflineUserDataJobId, ops: List[OfflineUserDataJobOperation]): Task[AddOfflineUserDataJobOperationsResponse] = {
+  override def addJobOps(connection: OAuthConnection, jobId: OfflineUserDataJobId, ops: List[OfflineUserDataJobOperation]): Task[AddOfflineUserDataJobOperationsResponse] = {
     ZIO.scoped {
       for {
-        userJobClient   <- clients.offlineUserDataJobServiceClient(customerOAuth)
-        jobResourceName <- ZIO.attempt(ResourceNames.offlineUserDataJob(customerOAuth.customerId.value, jobId.value))
+        userJobClient   <- clients.offlineUserDataJobServiceClient(connection)
+        jobResourceName <- ZIO.attempt(ResourceNames.offlineUserDataJob(connection.customerId.value, jobId.value))
         response <- ZIO.attempt(
                       userJobClient.addOfflineUserDataJobOperations(
                         AddOfflineUserDataJobOperationsRequest.newBuilder
@@ -78,10 +78,10 @@ case class GCMJobServiceImpl(clients: GCMClients) extends GCMJobService {
     }
   }
 
-  override def runJob(customerOAuth: CustomerOAuth, jobId: OfflineUserDataJobId): Task[Unit] = {
+  override def runJob(connection: OAuthConnection, jobId: OfflineUserDataJobId): Task[Unit] = {
     ZIO.scoped(for {
-      userJobClient   <- clients.offlineUserDataJobServiceClient(customerOAuth)
-      jobResourceName <- ZIO.attempt(ResourceNames.offlineUserDataJob(customerOAuth.customerId.value, jobId.value))
+      userJobClient   <- clients.offlineUserDataJobServiceClient(connection)
+      jobResourceName <- ZIO.attempt(ResourceNames.offlineUserDataJob(connection.customerId.value, jobId.value))
       _               <- ZIO.attempt(userJobClient.runOfflineUserDataJobAsync(jobResourceName))
     } yield ())
   }

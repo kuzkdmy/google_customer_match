@@ -1,7 +1,8 @@
 package com.test.gcm.routees
 
 import cats.implicits.catsSyntaxEitherId
-import com.test.gcm.domain.{CustomerDeveloperToken, CustomerId, CustomerOAuth, OAuthAccessToken, UserListResourceName}
+import com.google.ads.googleads.v13.resources.UserList
+import com.test.gcm.domain._
 import com.test.gcm.routees.UserListRoutesApi.{createUserListE, getUserListByNameE, CreateUserListRequest, UserListResponse}
 import com.test.gcm.service.GCMUserListService
 import sttp.capabilities.zio.ZioStreams
@@ -17,29 +18,35 @@ object UserListRoutesImpl {
 }
 
 trait UserListRoutesService {
-  def getUserListByName(cmd: (CustomerId, CustomerDeveloperToken, OAuthAccessToken, UserListResourceName)): Task[Either[Unit, UserListResponse]]
+  def getUserListByName(cmd: (ConnectionId, UserListName)): Task[Either[Unit, UserListResponse]]
   def createUserList(cmd: CreateUserListRequest): Task[Either[Unit, UserListResponse]]
 }
 
 case class UserListRoutesServiceImpl(svc: GCMUserListService) extends UserListRoutesService {
-  override def getUserListByName(cmd: (CustomerId, CustomerDeveloperToken, OAuthAccessToken, UserListResourceName)): Task[Either[Unit, UserListResponse]] = {
+  override def getUserListByName(cmd: (ConnectionId, UserListName)): Task[Either[Unit, UserListResponse]] = {
+    val (connectionId, userListName) = cmd
     for {
-      userList <- svc.getUserListByName(CustomerOAuth(cmd._1, cmd._2, cmd._3), cmd._4)
-      res = UserListResponse(UserListResourceName(userList.get.getResourceName)) // todo
+      userList <- svc.getUserListByName(connectionId, userListName)
+      res <- userList match {
+               case Some(v) => ZIO.succeed(toUserListResponse(v))
+               case None    => ZIO.fail(NotFoundError(connectionId.value, userListName.value))
+             }
     } yield res.asRight
   }
   override def createUserList(cmd: CreateUserListRequest): Task[Either[Unit, UserListResponse]] = {
-    for {
-      userList <- svc.getOrCreateUserList(
-                    CustomerOAuth(
-                      customerId     = cmd.asNoStorageOnServerSideCustomerId,
-                      developerToken = cmd.asNoStorageOnServerSideDeveloperToken,
-                      accessToken    = cmd.asNoStorageOnServerSideAccessToken
-                    ),
-                    cmd.resourceName
-                  )
-      res = UserListResponse(UserListResourceName(userList.getResourceName))
-    } yield res.asRight
+    svc
+      .getOrCreateUserList(cmd.connectionId, cmd.listName)
+      .map(v => toUserListResponse(v).asRight)
+  }
+
+  private def toUserListResponse(v: UserList): UserListResponse = {
+    UserListResponse(
+      UserListId(v.getId),
+      UserListName(v.getName),
+      UserListResourceName(v.getResourceName),
+      UserListDescription(v.getDescription),
+      UserListMatchRatePercentage(v.getMatchRatePercentage)
+    )
   }
 }
 
