@@ -21,6 +21,13 @@ object UserListRoutesApi {
       .in(jsonBody[CreateUserListRequest])
       .out(jsonBody[UserListResponse])
 
+  val operateListMembersE: PublicEndpoint[OperateListMembersRequest, Unit, OperateListMembersResponse, Any] =
+    baseEndpoint
+      .in("members")
+      .post
+      .in(jsonBody[OperateListMembersRequest])
+      .out(jsonBody[OperateListMembersResponse])
+
   case class CreateUserListRequest(connectionId: ConnectionId, listName: UserListName)
   case class UserListResponse(
       id: UserListId,
@@ -28,6 +35,19 @@ object UserListRoutesApi {
       resourceName: UserListResourceName,
       description: UserListDescription,
       matchRatePercentage: UserListMatchRatePercentage
+  )
+
+  case class OperateListMembersRequest(
+      connectionId: ConnectionId,
+      listId: UserListId,
+      rawEmailsToAdd: List[RawEmail],
+      rawEmailsToRemove: List[RawEmail],
+      hashedEmailsToAdd: List[HashedEmail],
+      hashedEmailsToRemove: List[HashedEmail]
+  )
+  case class OperateListMembersResponse(
+      listId: UserListId,
+      listName: UserListName
   )
 
 }

@@ -12,17 +12,31 @@ import zio.{&, Task, URLayer, ZIO, ZLayer}
 import scala.jdk.CollectionConverters.IterableHasAsScala
 
 trait GCMUserListService {
+  def getUserListById(connectionId: ConnectionId, userListId: UserListId): Task[Option[UserList]]
   def getUserListByName(connectionId: ConnectionId, userListName: UserListName): Task[Option[UserList]]
   def getOrCreateUserList(connectionId: ConnectionId, userListName: UserListName): Task[UserList]
 }
 
 case class GCMUserListServiceImpl(repo: GCMConnectionsStore, clients: GCMClients) extends GCMUserListService {
 
+  override def getUserListById(connectionId: ConnectionId, userListId: UserListId): Task[Option[UserList]] = {
+    getUserListByQuery(
+      connectionId,
+      s"SELECT user_list.id, user_list.name, user_list.description, user_list.membership_status FROM user_list WHERE user_list.id = '${userListId.value}'"
+    )
+  }
+
   override def getUserListByName(connectionId: ConnectionId, userListName: UserListName): Task[Option[UserList]] = {
+    getUserListByQuery(
+      connectionId,
+      s"SELECT user_list.id, user_list.name, user_list.description, user_list.membership_status FROM user_list WHERE user_list.name = '$userListName'"
+    )
+  }
+
+  private def getUserListByQuery(connectionId: ConnectionId, query: String): Task[Option[UserList]] = {
     ZIO.scoped(for {
       connection       <- repo.getOauthConnection(connectionId)
       adsServiceClient <- clients.googleAdsServiceClient(connection)
-      query   = s"SELECT user_list.id, user_list.name, user_list.description, user_list.membership_status FROM user_list WHERE user_list.name = '$userListName'"
       request = SearchGoogleAdsRequest.newBuilder().setCustomerId(connection.customerId.toString).setQuery(query).build()
       response <- ZIO.attempt(adsServiceClient.search(request))
       res      <- ZIO.attempt(response.iterateAll.asScala.toList.headOption.flatMap(r => Option(r.getUserList)))

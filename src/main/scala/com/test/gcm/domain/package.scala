@@ -19,4 +19,6 @@ package object domain {
   @derive(schema) @newtype case class OAuthAccessToken(value: String)
   @derive(schema) @newtype case class OAuthRefreshToken(value: String)
   @derive(schema) @newtype case class OfflineUserJobResourceName(value: String)
+  @derive(schema) @newtype case class HashedEmail(value: String)
+  @derive(schema) @newtype case class RawEmail(value: String)
 }
