@@ -10,34 +10,27 @@ import zio.{Task, ZIO, ZLayer}
 object OAuthRoutesImpl {
   type Env = OAuthRoutesService
   def endpoints[R <: Env]: List[ZServerEndpoint[R, ZioStreams]] = List(
-    initOAuthE.serverLogic(_ => ZIO.serviceWithZIO[Env](_.initOAuthAttempt())): ZServerEndpoint[R, ZioStreams],
+    initOAuthE.serverLogic(i => ZIO.serviceWithZIO[Env](_.initOAuthAttempt(i))): ZServerEndpoint[R, ZioStreams],
     completeOAuthE.serverLogic(i => ZIO.serviceWithZIO[Env](_.completeOAuthAttempt(i))): ZServerEndpoint[R, ZioStreams]
   )
 }
 
 trait OAuthRoutesService {
-  def initOAuthAttempt(): Task[Either[Unit, InitOAuthResponse]]
+  def initOAuthAttempt(req: InitOAuthRequest): Task[Either[Unit, InitOAuthResponse]]
   def completeOAuthAttempt(req: CompleteOAuthRequest): Task[Either[Unit, CompleteOAuthResponse]]
 }
 
 case class OAuthRoutesServiceImpl(svc: OAuthService) extends OAuthRoutesService {
-  override def initOAuthAttempt(): Task[Either[Unit, InitOAuthResponse]] = {
-    for {
-      e <- svc.oauthAttempt()
-      res = InitOAuthResponse(id = e.id, redirectUrl = e.redirectUrl)
-    } yield res.asRight
+  override def initOAuthAttempt(req: InitOAuthRequest): Task[Either[Unit, InitOAuthResponse]] = {
+    svc
+      .oauthAttempt(req.customerId, req.developerToken)
+      .map(e => InitOAuthResponse(e.id, e.redirectUrl).asRight)
   }
 
   override def completeOAuthAttempt(req: CompleteOAuthRequest): Task[Either[Unit, CompleteOAuthResponse]] = {
-    for {
-      e <- svc.completeOauthAttempt(req.id, req.code)
-      res = CompleteOAuthResponse(
-              id                                  = req.id,
-              tokenExpiresInSeconds               = e.getExpiresInSeconds,
-              asNoStorageOnServerSideAccessToken  = e.getAccessToken,
-              asNoStorageOnServerSideRefreshToken = e.getRefreshToken
-            )
-    } yield res.asRight
+    svc
+      .completeOauthAttempt(req.id, req.code)
+      .map(e => CompleteOAuthResponse(req.id, e.tokenExpiresAt).asRight)
   }
 }
 
