@@ -7,7 +7,6 @@ import com.google.ads.googleads.v13.services._
 import com.google.common.collect.ImmutableList
 import com.test.gcm.domain._
 import com.test.gcm.repository.GCMConnectionsStore
-import sttp.model.StatusCode
 import zio.{&, Task, URLayer, ZIO, ZLayer}
 
 import scala.jdk.CollectionConverters.IterableHasAsScala
@@ -21,7 +20,7 @@ case class GCMUserListServiceImpl(repo: GCMConnectionsStore, clients: GCMClients
 
   override def getUserListByName(connectionId: ConnectionId, userListName: UserListName): Task[Option[UserList]] = {
     ZIO.scoped(for {
-      connection       <- getOauthConnection(connectionId)
+      connection       <- repo.getOauthConnection(connectionId)
       adsServiceClient <- clients.googleAdsServiceClient(connection)
       query   = s"SELECT user_list.id, user_list.name, user_list.description, user_list.membership_status FROM user_list WHERE user_list.name = '$userListName'"
       request = SearchGoogleAdsRequest.newBuilder().setCustomerId(connection.customerId.toString).setQuery(query).build()
@@ -50,7 +49,7 @@ case class GCMUserListServiceImpl(repo: GCMConnectionsStore, clients: GCMClients
 
   private def createUserList(connectionId: ConnectionId, userListName: UserListName): Task[MutateUserListsResponse] = {
     ZIO.scoped(for {
-      connection     <- getOauthConnection(connectionId)
+      connection     <- repo.getOauthConnection(connectionId)
       userListClient <- clients.userListServiceClient(connection)
       userList = UserList
                    .newBuilder()
@@ -70,16 +69,6 @@ case class GCMUserListServiceImpl(repo: GCMConnectionsStore, clients: GCMClients
     } yield res)
   }
 
-  private def getOauthConnection(id: ConnectionId): Task[OAuthConnection] = {
-    for {
-      connOpt <- repo.get(id)
-      conn <- connOpt match {
-                case None                            => ZIO.fail(NotFoundError(id.value, "Connection"))
-                case Some(_: OAuthConnectionAttempt) => ZIO.fail(CustomError(s"Connection ${id.value} is not authorized", StatusCode.BadRequest))
-                case Some(v: OAuthConnection)        => ZIO.succeed(v)
-              }
-    } yield conn
-  }
 }
 
 object GCMUserListServiceImpl {

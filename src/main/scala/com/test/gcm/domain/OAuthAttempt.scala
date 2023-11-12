@@ -1,12 +1,6 @@
 package com.test.gcm.domain
 import java.time.LocalDateTime
 
-// todo remove
-case class CustomerOAuth(
-    customerId: CustomerId,
-    developerToken: CustomerDeveloperToken,
-    accessToken: OAuthAccessToken
-)
 sealed trait IsOAuthConnection {
   def id: ConnectionId
   def customerId: CustomerId
