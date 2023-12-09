@@ -1,15 +1,15 @@
 package com.test.gcm.routees
 
-import cats.implicits.catsSyntaxEitherId
-import com.google.ads.googleads.v13.common.{UserData, UserIdentifier}
+import cats.implicits.{catsSyntaxApplicativeId, catsSyntaxEitherId}
 import com.google.ads.googleads.v13.resources.UserList
 import com.google.ads.googleads.v13.services.OfflineUserDataJobOperation
 import com.test.gcm.domain._
 import com.test.gcm.routees.UserListRoutesApi._
-import com.test.gcm.service.{GCMJobService, GCMSha256Hashing, GCMUserListService}
+import com.test.gcm.service.{ApiConverter, GCMJobService, GCMUserListService}
 import sttp.capabilities.zio.ZioStreams
 import sttp.tapir.ztapir.ZServerEndpoint
-import zio.{&, Task, ZIO, ZLayer}
+import zio.interop.catz._
+import zio.{&, Task, UIO, URLayer, ZIO, ZLayer}
 
 object UserListRoutesImpl {
   type Env = UserListRoutesService
@@ -28,7 +28,8 @@ trait UserListRoutesService {
 
 case class UserListRoutesServiceImpl(
     listSvc: GCMUserListService,
-    jobSvc: GCMJobService
+    jobSvc: GCMJobService,
+    converter: ApiConverter
 ) extends UserListRoutesService {
   override def getUserListByName(cmd: (ConnectionId, UserListName)): Task[Either[Unit, UserListResponse]] = {
     val (connectionId, userListName) = cmd
@@ -47,41 +48,18 @@ case class UserListRoutesServiceImpl(
   }
 
   override def operateListMembers(cmd: OperateListMembersRequest): Task[Either[Unit, OperateListMembersResponse]] = {
-    def mkHash(v: RawEmail) = HashedEmail(GCMSha256Hashing.hash(v.value, trimIntermediateSpaces = true))
     for {
       listOpt <- listSvc.getUserListById(cmd.connectionId, cmd.listId)
       userList <- listOpt match {
                     case None       => ZIO.fail(NotFoundError(cmd.listId.value.toString, "User list"))
-                    case Some(list) => ZIO.succeed(list)
+                    case Some(list) => list.pure[UIO]
                   }
-      toAdd    <- ZIO.attempt { (cmd.hashedEmailsToAdd ++ cmd.rawEmailsToAdd.map(mkHash)).distinct }
-      toRemove <- ZIO.attempt { (cmd.hashedEmailsToRemove ++ cmd.rawEmailsToRemove.map(mkHash)).distinct }
-      jobs     <- jobSvc.pendingJobs(cmd.connectionId, userList)
-      operationJob <- jobs match {
-                        case Nil =>
-                          jobSvc.createJob(cmd.connectionId, userList) *>
-                            jobSvc.pendingJobs(cmd.connectionId, userList).map(_.head)
-                        case x :: _ => ZIO.succeed(x)
-                      }
-      operateCmd <- ZIO.succeed(OperateListMembersCmd(toAdd.map(AddMember.apply), toRemove.map(RemoveMember.apply)))
-      res        <- jobSvc.addJobOps(cmd.connectionId, userList, operationJob, toOps(operateCmd))
-    } yield OperateListMembersResponse(UserListId(userList.getId), UserListName(userList.getName)).asRight
-  }
-
-  private def toOps(cmd: OperateListMembersCmd): List[OfflineUserDataJobOperation] = {
-    def toUserIdentity(hashedEmail: HashedEmail): UserData.Builder = {
-      UserData
-        .newBuilder()
-        .addUserIdentifiers(
-          UserIdentifier.newBuilder().setHashedEmail(hashedEmail.value).build()
-        )
-    }
-
-    cmd.addMembers.map { m =>
-      OfflineUserDataJobOperation.newBuilder().setCreate(toUserIdentity(m.hashedEmail)).build()
-    } ++ cmd.removeMembers.map { m =>
-      OfflineUserDataJobOperation.newBuilder().setRemove(toUserIdentity(m.hashedEmail)).build()
-    }
+      _            <- jobSvc.createJob(cmd.connectionId, userList)
+      operationJob <- jobSvc.pendingJobs(cmd.connectionId, userList).map(_.head)
+      toAdd        <- cmd.membersToAdd.map(converter.toUserData).map(m => OfflineUserDataJobOperation.newBuilder().setCreate(m).build()).pure[UIO]
+      toRm         <- cmd.membersToRemove.map(converter.toUserData).map(m => OfflineUserDataJobOperation.newBuilder().setRemove(m).build()).pure[UIO]
+      _            <- jobSvc.addJobOps(cmd.connectionId, userList, operationJob, toAdd ++ toRm)
+    } yield OperateListMembersResponse(UserListId(userList.getId), UserListName(userList.getName), operationJob).asRight
   }
 
   private def toUserListResponse(v: UserList): UserListResponse = {
@@ -96,6 +74,6 @@ case class UserListRoutesServiceImpl(
 }
 
 object UserListRoutesServiceImpl {
-  lazy val layer: ZLayer[GCMUserListService & GCMJobService, Nothing, UserListRoutesService] =
+  lazy val layer: URLayer[GCMUserListService & GCMJobService & ApiConverter, UserListRoutesService] =
     ZLayer.fromFunction(UserListRoutesServiceImpl.apply _)
 }

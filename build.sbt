@@ -10,15 +10,17 @@ lazy val root = (project in file("."))
       "com.google.api-ads"           % "google-ads"                      % "24.0.0",
       "com.google.api-client"        % "google-api-client"               % "2.2.0",
       "com.google.auth"              % "google-auth-library-oauth2-http" % "1.16.0",
-      "com.softwaremill.sttp.tapir" %% "tapir-zio"                       % "1.8.3",
-      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server"           % "1.8.3",
-      "com.softwaremill.sttp.tapir" %% "tapir-json-circe"                % "1.8.2",
-      "com.softwaremill.sttp.tapir" %% "tapir-derevo"                    % "1.8.2",
-      "ch.qos.logback"               % "logback-classic"                 % "1.4.7",
+      "com.softwaremill.sttp.tapir" %% "tapir-zio"                       % "1.9.4",
+      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server"           % "1.9.4",
+      "com.softwaremill.sttp.tapir" %% "tapir-json-circe"                % "1.9.4",
+      "com.softwaremill.sttp.tapir" %% "tapir-derevo"                    % "1.9.4",
+      "ch.qos.logback"               % "logback-classic"                 % "1.4.14",
       "com.github.pureconfig"       %% "pureconfig"                      % "0.17.4",
-      "dev.zio"                     %% "zio-logging-slf4j"               % "2.1.14",
-      "dev.zio"                     %% "zio-logging-slf4j-bridge"        % "2.1.14",
-      "io.estatico"                 %% "newtype"                         % "0.4.4"
+      "dev.zio"                     %% "zio-logging-slf4j"               % "2.1.16",
+      "dev.zio"                     %% "zio-logging-slf4j-bridge"        % "2.1.16",
+      "io.estatico"                 %% "newtype"                         % "0.4.4",
+      "dev.zio"                     %% "zio-interop-cats"                % "23.1.0.0",
+      "org.typelevel"               %% "cats-effect"                     % "3.5.2"
     )
   )
 

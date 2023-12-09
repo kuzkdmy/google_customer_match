@@ -40,14 +40,31 @@ object UserListRoutesApi {
   case class OperateListMembersRequest(
       connectionId: ConnectionId,
       listId: UserListId,
-      rawEmailsToAdd: List[RawEmail],
-      rawEmailsToRemove: List[RawEmail],
-      hashedEmailsToAdd: List[HashedEmail],
-      hashedEmailsToRemove: List[HashedEmail]
+      membersToAdd: List[UserIdentity],
+      membersToRemove: List[UserIdentity]
+  )
+  case class UserIdentity(
+      email: Option[RawEmail],
+      hashedEmail: Option[HashedEmail],
+      mobileId: Option[MobileId],
+      thirdPartyUserId: Option[ThirdPartyUserId],
+      phoneNumber: Option[RawPhoneNumber],
+      hashedPhoneNumber: Option[HashedPhoneNumber],
+      firstName: Option[RawFirstName],
+      hashedFirstName: Option[HashedFirstName],
+      lastName: Option[RawLastName],
+      hashedLastName: Option[HashedLastName],
+      state: Option[State],
+      postalCode: Option[PostalCode],
+      countryCode: Option[CountryCode],
+      city: Option[City],
+      streetAddress: Option[RawStreetAddress],
+      hashedStreetAddress: Option[HashedStreetAddress]
   )
   case class OperateListMembersResponse(
       listId: UserListId,
-      listName: UserListName
+      listName: UserListName,
+      jobId: OfflineUserDataJobId
   )
 
 }
