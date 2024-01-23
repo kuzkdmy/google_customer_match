@@ -1,9 +1,9 @@
 package com.test.gcm.service
 
-import com.google.ads.googleads.v13.common.CrmBasedUserListInfo
-import com.google.ads.googleads.v13.enums.CustomerMatchUploadKeyTypeEnum.CustomerMatchUploadKeyType
-import com.google.ads.googleads.v13.resources.UserList
-import com.google.ads.googleads.v13.services._
+import com.google.ads.googleads.v15.common.CrmBasedUserListInfo
+import com.google.ads.googleads.v15.enums.CustomerMatchUploadKeyTypeEnum.CustomerMatchUploadKeyType
+import com.google.ads.googleads.v15.resources.UserList
+import com.google.ads.googleads.v15.services._
 import com.google.common.collect.ImmutableList
 import com.test.gcm.domain._
 import com.test.gcm.repository.GCMConnectionsStore

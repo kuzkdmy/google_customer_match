@@ -1,11 +1,11 @@
 package com.test.gcm.service
 
-import com.google.ads.googleads.v13.common.CustomerMatchUserListMetadata
-import com.google.ads.googleads.v13.enums.OfflineUserDataJobStatusEnum
-import com.google.ads.googleads.v13.enums.OfflineUserDataJobTypeEnum.OfflineUserDataJobType
-import com.google.ads.googleads.v13.resources.{OfflineUserDataJob, UserList}
-import com.google.ads.googleads.v13.services._
-import com.google.ads.googleads.v13.utils.{ErrorUtils, ResourceNames}
+import com.google.ads.googleads.v15.common.CustomerMatchUserListMetadata
+import com.google.ads.googleads.v15.enums.OfflineUserDataJobStatusEnum
+import com.google.ads.googleads.v15.enums.OfflineUserDataJobTypeEnum.OfflineUserDataJobType
+import com.google.ads.googleads.v15.resources.{OfflineUserDataJob, UserList}
+import com.google.ads.googleads.v15.services._
+import com.google.ads.googleads.v15.utils.{ErrorUtils, ResourceNames}
 import com.test.gcm.domain.{ConnectionId, NotFoundError, OfflineUserDataJobId}
 import com.test.gcm.repository.GCMConnectionsStore
 import zio.{&, Task, URLayer, ZIO, ZLayer}
