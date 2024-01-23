@@ -1,6 +1,6 @@
 package com.test.gcm.service
 
-import com.google.ads.googleads.v13.common.{OfflineUserAddressInfo, UserData, UserIdentifier}
+import com.google.ads.googleads.v15.common.{OfflineUserAddressInfo, UserData, UserIdentifier}
 import com.test.gcm.routees.UserListRoutesApi.UserIdentity
 import zio.{ULayer, ZLayer}
 

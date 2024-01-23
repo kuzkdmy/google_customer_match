@@ -2,3 +2,4 @@
 *.idea
 .bsp
 .DS_Store
+.env

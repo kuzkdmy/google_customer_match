@@ -1,8 +1,8 @@
 package com.test.gcm.routees
 
 import cats.implicits.{catsSyntaxApplicativeId, catsSyntaxEitherId}
-import com.google.ads.googleads.v13.resources.UserList
-import com.google.ads.googleads.v13.services.OfflineUserDataJobOperation
+import com.google.ads.googleads.v15.resources.UserList
+import com.google.ads.googleads.v15.services.OfflineUserDataJobOperation
 import com.test.gcm.domain._
 import com.test.gcm.routees.UserListRoutesApi._
 import com.test.gcm.service.{ApiConverter, GCMJobService, GCMUserListService}

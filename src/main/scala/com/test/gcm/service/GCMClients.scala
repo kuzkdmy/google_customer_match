@@ -1,7 +1,7 @@
 package com.test.gcm.service
 
 import com.google.ads.googleads.lib.GoogleAdsClient
-import com.google.ads.googleads.v13.services.{GoogleAdsServiceClient, OfflineUserDataJobServiceClient, UserListServiceClient}
+import com.google.ads.googleads.v15.services.{GoogleAdsServiceClient, OfflineUserDataJobServiceClient, UserListServiceClient}
 import com.google.auth.oauth2.{AccessToken, UserCredentials}
 import com.test.gcm.config.AppConfig.GoogleServerApiCredsConfig
 import com.test.gcm.domain.OAuthConnection
