@@ -17,7 +17,8 @@ lazy val root = (project in file("."))
       "ch.qos.logback"               % "logback-classic"                 % "1.4.14",
       "com.github.pureconfig"       %% "pureconfig"                      % "0.17.5",
       "dev.zio"                     %% "zio-logging-slf4j"               % "2.2.0",
-      "dev.zio"                     %% "zio-logging-slf4j-bridge"        % "2.2.0",
+      "dev.zio"                     %% "zio-logging-slf4j"               % "2.2.0",
+      "dev.zio"                     %% "zio-test"                        % "2.0.21" % Test,
       "io.estatico"                 %% "newtype"                         % "0.4.4",
       "dev.zio"                     %% "zio-interop-cats"                % "23.1.0.0",
       "org.typelevel"               %% "cats-effect"                     % "3.5.2"

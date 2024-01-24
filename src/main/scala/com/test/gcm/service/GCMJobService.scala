@@ -96,7 +96,7 @@ case class GCMJobServiceImpl(clients: GCMClients, repo: GCMConnectionsStore) ext
                       userJobClient.addOfflineUserDataJobOperations(
                         AddOfflineUserDataJobOperationsRequest.newBuilder
                           .setResourceName(jobResourceName)
-                          .setEnablePartialFailure(true)
+                          .setEnablePartialFailure(false)
                           .addAllOperations(ops.asJava)
                           .build
                       )

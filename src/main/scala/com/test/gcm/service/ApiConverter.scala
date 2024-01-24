@@ -18,10 +18,10 @@ case class ApiConverterImpl() extends ApiConverter {
           b <- u.email.map(_.value).map(mkHash).fold(Some(b))(v => Some(b.setHashedEmail(v)))
           b <- u.hashedEmail.fold(Some(b))(v => Some(b.setHashedEmail(v.value)))
           b <- u.mobileId.fold(Some(b))(v => Some(b.setMobileId(v.value)))
-          b <- u.thirdPartyUserId.fold(Some(b))(v => Some(b.setThirdPartyUserId(v.value)))
-          b <- u.phoneNumber.map(_.value).map(mkHash).fold(Some(b))(v => Some(b.setHashedPhoneNumber(v)))
-          b <- u.hashedPhoneNumber.fold(Some(b))(v => Some(b.setHashedPhoneNumber(v.value)))
-          b <- extractAddressInfo(u).fold(Some(b))(v => Some(b.setAddressInfo(v)))
+//          b <- u.thirdPartyUserId.fold(Some(b))(v => Some(b.setThirdPartyUserId(v.value)))
+//          b <- u.phoneNumber.map(_.value).map(mkHash).fold(Some(b))(v => Some(b.setHashedPhoneNumber(v)))
+//          b <- u.hashedPhoneNumber.fold(Some(b))(v => Some(b.setHashedPhoneNumber(v.value)))
+//          b <- extractAddressInfo(u).fold(Some(b))(v => Some(b.setAddressInfo(v)))
         } yield b.build()).get
       }
       .build()
