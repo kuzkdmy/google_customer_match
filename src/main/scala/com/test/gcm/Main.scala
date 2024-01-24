@@ -6,8 +6,9 @@ import com.test.gcm.routees.{OAuthRoutesImpl, OAuthRoutesServiceImpl, UserListRo
 import com.test.gcm.service._
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import zio.http.Server
+import zio.http.Server.{Config, RequestStreaming}
 import zio.logging.consoleLogger
-import zio.{Scope, ZIO, ZIOAppArgs, ZLayer}
+import zio.{Scope, ULayer, ZIO, ZIOAppArgs, ZLayer}
 
 object Main extends zio.ZIOAppDefault {
 
@@ -18,6 +19,7 @@ object Main extends zio.ZIOAppDefault {
     type Env = OAuthRoutesImpl.Env with UserListRoutesImpl.Env
     val routes: zio.http.HttpApp[Env] =
       ZioHttpInterpreter().toHttp(OAuthRoutesImpl.endpoints[Env] ++ UserListRoutesImpl.endpoints[Env])
+    val configLayer: ULayer[Config] = ZLayer.succeed[Config](Config.default.copy(requestStreaming = RequestStreaming.Disabled(5242880)))
     ZIO.logInfo("Starting server with default port : 8080") *>
       Server
         .serve(routes)
@@ -25,7 +27,8 @@ object Main extends zio.ZIOAppDefault {
           AppConfig.layer,
           OAuthServiceImpl.layer,
           OAuthRoutesServiceImpl.layer,
-          Server.default,
+          configLayer,
+          Server.live,
           GCMClientsImpl.layer,
           GCMJobServiceImpl.layer,
           GCMUserListServiceImpl.layer,

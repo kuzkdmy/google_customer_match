@@ -44,22 +44,22 @@ object UserListRoutesApi {
       membersToRemove: List[UserIdentity]
   )
   case class UserIdentity(
-      email: Option[RawEmail],
-      hashedEmail: Option[HashedEmail],
-      mobileId: Option[MobileId],
-      thirdPartyUserId: Option[ThirdPartyUserId],
-      phoneNumber: Option[RawPhoneNumber],
-      hashedPhoneNumber: Option[HashedPhoneNumber],
-      firstName: Option[RawFirstName],
-      hashedFirstName: Option[HashedFirstName],
-      lastName: Option[RawLastName],
-      hashedLastName: Option[HashedLastName],
-      state: Option[State],
-      postalCode: Option[PostalCode],
-      countryCode: Option[CountryCode],
-      city: Option[City],
-      streetAddress: Option[RawStreetAddress],
-      hashedStreetAddress: Option[HashedStreetAddress]
+      email: Option[RawEmail]                          = None,
+      hashedEmail: Option[HashedEmail]                 = None,
+      mobileId: Option[MobileId]                       = None,
+      thirdPartyUserId: Option[ThirdPartyUserId]       = None,
+      phoneNumber: Option[RawPhoneNumber]              = None,
+      hashedPhoneNumber: Option[HashedPhoneNumber]     = None,
+      firstName: Option[RawFirstName]                  = None,
+      hashedFirstName: Option[HashedFirstName]         = None,
+      lastName: Option[RawLastName]                    = None,
+      hashedLastName: Option[HashedLastName]           = None,
+      state: Option[State]                             = None,
+      postalCode: Option[PostalCode]                   = None,
+      countryCode: Option[CountryCode]                 = None,
+      city: Option[City]                               = None,
+      streetAddress: Option[RawStreetAddress]          = None,
+      hashedStreetAddress: Option[HashedStreetAddress] = None
   )
   case class OperateListMembersResponse(
       listId: UserListId,
