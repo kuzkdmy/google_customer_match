@@ -69,7 +69,7 @@ case class GCMUserListServiceImpl(repo: GCMConnectionsStore, clients: GCMClients
                    .newBuilder()
                    .setName(userListName.value)
                    .setDescription("GCM integration via API created users list")
-                   .setMembershipLifeSpan(30) // days, 10,000 value is to indicate unlimited
+                   .setMembershipLifeSpan(30)
                    //          .setMembershipStatus(UserListMembershipStatusEnum.UserListMembershipStatus.OPEN)
                    .setCrmBasedUserList(
                      CrmBasedUserListInfo

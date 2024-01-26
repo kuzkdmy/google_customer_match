@@ -15,6 +15,7 @@ object Main extends zio.ZIOAppDefault {
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
     zio.Runtime.removeDefaultLoggers >>> consoleLogger()
 
+  // TODO need to check, saw list with 1 day retention, but new was with 30
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     type Env = OAuthRoutesImpl.Env with UserListRoutesImpl.Env
     val routes: zio.http.HttpApp[Env] =

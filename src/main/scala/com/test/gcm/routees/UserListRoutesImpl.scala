@@ -59,6 +59,7 @@ case class UserListRoutesServiceImpl(
       toAdd        <- cmd.membersToAdd.map(converter.toUserData).map(m => OfflineUserDataJobOperation.newBuilder().setCreate(m).build()).pure[UIO]
       toRm         <- cmd.membersToRemove.map(converter.toUserData).map(m => OfflineUserDataJobOperation.newBuilder().setRemove(m).build()).pure[UIO]
       _            <- jobSvc.addJobOps(cmd.connectionId, userList, operationJob, toAdd ++ toRm)
+      _            <- jobSvc.runJob(cmd.connectionId, operationJob)
     } yield OperateListMembersResponse(UserListId(userList.getId), UserListName(userList.getName), operationJob).asRight
   }
 
